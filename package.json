@@ -1,5 +1,5 @@
 {
-  "name": "koa-rewrite",
+  "name": "koa-rewrite-75lb",
   "description": "URL rewrite middleware for koa",
   "repository": "koajs/rewrite",
   "version": "2.1.0",
@@ -17,14 +17,13 @@
     "index.js"
   ],
   "devDependencies": {
-    "koa": "^2.0.0-alpha.3",
-    "mocha": "^2.4.5",
-    "supertest": "^1.2.0"
+    "koa": "^2.3.0",
+    "mocha": "^3.4.2",
+    "supertest": "^3.0.0"
   },
   "license": "MIT",
   "dependencies": {
-    "debug": "*",
-    "path-to-regexp": "0.0.2"
+    "path-to-regexp": "1.7.0"
   },
   "engines": {
     "node": ">= 4"

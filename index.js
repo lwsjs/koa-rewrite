@@ -3,8 +3,7 @@
  * Module dependencies.
  */
 
- const debug = require('debug')('koa-rewrite');
- const toRegexp = require('path-to-regexp');
+const toRegexp = require('path-to-regexp');
 
 /**
  * Expose `expose`.
@@ -21,12 +20,10 @@ module.exports = rewrite;
  * @api public
  */
 
-function rewrite(src, dst) {
+function rewrite(src, dst, mw) {
   const keys = [];
   const re = toRegexp(src, keys);
   const map = toMap(keys);
-
-  debug('rewrite %s -> %s    %s', src, dst, re);
 
   return function(ctx, next) {
     const orig = ctx.url;
@@ -38,7 +35,12 @@ function rewrite(src, dst) {
         return m[n];
       });
 
-      debug('rewrite %s -> %s', orig, ctx.url);
+      if (mw) {
+        mw.emit('verbose', 'middleware.rewrite.local', {
+          from: orig,
+          to: ctx.url
+        })
+      }
 
       return next().then(() => {
         ctx.url = orig;
