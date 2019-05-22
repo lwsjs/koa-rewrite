@@ -4,11 +4,10 @@ const request = require('supertest');
 const Koa = require('koa');
 const rewrite = require('..');
 
-function differentPathHelper(ctx, next) {
+async function differentPathHelper(ctx, next) {
   const orig = ctx.path;
-  return next().then(() => {
-    if (orig !== ctx.path) ctx.throw(ctx.path + ' not equal to original path ' + orig);
-  });
+  await next();
+  if (orig !== ctx.path) ctx.throw(ctx.path + ' not equal to original path ' + orig);
 }
 
 describe('new Koa-rewrite', () => {
@@ -51,10 +50,10 @@ describe('new Koa-rewrite', () => {
     .expect('/commits/foo/to/bar', done);
   });
 
-  it('rewrite /js/* -> /public/assets/js/$1', done => {
+  it('rewrite /js/(.*) -> /public/assets/js/$1', done => {
     const app = new Koa();
     app.use(differentPathHelper);
-    app.use(rewrite('/js/*', '/public/assets/js/$1'));
+    app.use(rewrite('/js/(.*)', '/public/assets/js/$1'));
     app.use((ctx) => {
       ctx.body = ctx.path;
     });
@@ -89,4 +88,31 @@ describe('new Koa-rewrite', () => {
     .get('/one/test1/two/test2')
     .expect('/one/two?arg1=test1&arg2=test2', done);
   });
+
+  it('rewrite /?foo=bar -> /home?foo=bar', done => {
+    const app = new Koa();
+    app.use(differentPathHelper);
+    app.use(rewrite(/^\/((\?)(.*?))?$/, '/home$2$3'));
+    app.use((ctx) => {
+      ctx.body = ctx.url;
+    });
+
+    request(app.callback())
+    .get('/?foo=bar')
+    .expect('/home?foo=bar', done);
+  });
+
+  it('rewrite / -> /home', done => {
+    const app = new Koa();
+    app.use(differentPathHelper);
+    app.use(rewrite(/^\/((\?)(.*?))?$/, '/home$2$3'));
+    app.use((ctx) => {
+      ctx.body = ctx.url;
+    });
+
+    request(app.callback())
+    .get('/')
+    .expect('/home', done);
+  });
+
 });
